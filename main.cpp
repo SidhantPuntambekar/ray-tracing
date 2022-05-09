@@ -1,3 +1,6 @@
+#include "color.h"
+#include "vec3.h"
+
 #include <iostream>
 using namespace std;
 
@@ -15,15 +18,8 @@ int main()
         cerr << "\rDEBUG: Scanlines remaining: " << i << ' ' << flush;
         for (int j = 0; j < imageWidth; j++) // For each column in the image
         {
-            auto r = double(j) / (imageWidth - 1);
-            auto g = double(i) / (imageHeight - 1);
-            auto b = 0.25; 
-
-            int imageRed = static_cast<int> (255.999 * r);
-            int imageGreen = static_cast<int> (255.999 * g);
-            int imageBlue = static_cast<int> (255.999 * b);
-
-            cout << imageRed << " " << imageGreen << " " << imageBlue << "\n";
+            color pixelColor(double(j) / (imageWidth - 1), double(i) / (imageHeight - 1), 0.25);
+            writeColor(cout, pixelColor);
         }
     }
 
