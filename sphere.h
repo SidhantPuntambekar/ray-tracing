@@ -26,9 +26,9 @@ class sphere : public hittable
 bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) const
 {
     vec3 originShift = r.getOrigin() - center;
-    auto a = r.direction().length_squared();
-    auto half_b = dot(oc, r.direction());
-    auto c = oc.length_squared() - radius*radius;
+    auto a = r.getDirection().euclidean_norm_squared();
+    auto half_b = dot(originShift, r.getDirection());
+    auto c = originShift.euclidean_norm_squared() - radius*radius;
 
     auto discriminant = half_b*half_b - a*c;
     if (discriminant < 0) 
@@ -50,7 +50,7 @@ bool sphere::hit(const ray& r, double t_min, double t_max, hit_record& rec) cons
     }
 
     rec.t = root;
-    rec.p = r.at(rec.t);
+    rec.p = r.destination(rec.t);
     vec3 outward_normal = (rec.p - center) / radius;
     rec.set_face_normal(r, outward_normal);
 

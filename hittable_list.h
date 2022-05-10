@@ -7,13 +7,13 @@
 #include <vector>
 using namespace std;
 
-using shared_ptr;
-using make_shared;
+using std::shared_ptr;
+using std::make_shared;
 
 class hittable_list : public hittable
- {
+{
     public:
-        vector<shared_ptr<hittable>> objects; // Shared pointer is a reference to some object with a reference count semantics. Deletes object if it goes out of scope
+        vector<shared_ptr<hittable> > objects; // Shared pointer is a reference to some object with a reference count semantics. Deletes object if it goes out of scope
         hittable_list() {}
         hittable_list(shared_ptr<hittable> object) { add(object); }
 

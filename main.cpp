@@ -28,37 +28,44 @@ double hit_sphere(const point3& center, double radius, const ray& r)
 }
 
 // Returns the color of the background (which should be a simple gradient)
-color ray_color(const ray& r)
+color ray_color(const ray& r, const hittable& world) 
 {
-    auto t = hit_sphere(point3(0, 0, -1), 0.5, r); // Call hit_sphere to generate a sphere at (0, 0, -1) center with radius 0.5 and ray trace r
-    if (t > 0.0) // If  
+    hit_record rec;
+    if (world.hit(r, 0, infinity, rec)) 
     {
-        vec3 N = unit_vector(r.destination(t) - vec3(0, 0, -1));
-        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
+        return 0.5 * (rec.normal + color(1, 1, 1));
     }
     vec3 unit_direction = unit_vector(r.getDirection());
-    t = 0.5 * (unit_direction.y() + 1.0);
-    return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0); //blendedValue = (1 - t) * startValue + t * endValue
+    auto t = 0.5 * (unit_direction.y() + 1.0);
+    return (1.0 - t)* color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0);
 }
 
 // Simple portable pixmap format (PPM) Image Output
 int main()
 {
+    // Image
     // Create a default 16:9 aspect ratio pixel image
-    const auto aspect_ratio = 16.0 / 9.0;
+    const double aspect_ratio = 16.0 / 9.0;
     const int imageWidth = 400;
     const int imageHeight = static_cast<int>(imageWidth / aspect_ratio);
 
+    // World
+    hittable_list world;
+    world.add(make_shared<sphere>(point3(0,0,-1), 0.5));
+    world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
+
+    // Camera
     // Simulated camera for Ray Tracer 
-    auto viewportHeight = 2.0;
-    auto viewportWidth = aspect_ratio * viewportHeight;
-    auto focalLength = 1.0;
+    double viewportHeight = 2.0;
+    double viewportWidth = aspect_ratio * viewportHeight;
+    double focalLength = 1.0;
 
     auto origin = point3(0, 0, 0);
     auto horizontal = vec3(viewportWidth, 0, 0);
     auto vertical = vec3(0, viewportHeight, 0);
     auto lowerLeft = origin - horizontal / 2 - vertical / 2 - vec3(0, 0, focalLength);
 
+    // Render Sphere and World
     cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n"; // PPM output
 
     for (int i = imageHeight - 1; i >= 0; i--) // For each row in the image
@@ -69,7 +76,7 @@ int main()
             auto u = double(j) / (imageWidth - 1);
             auto v = double(i) / (imageHeight - 1);
             ray r = ray(origin, (lowerLeft + u * horizontal + (v * vertical - origin)));
-            color pixelColor = ray_color(r);
+            color pixelColor = ray_color(r, world);
             writeColor(cout, pixelColor);
         }
     }

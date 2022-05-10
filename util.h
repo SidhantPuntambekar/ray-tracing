@@ -6,11 +6,12 @@
 #include <memory>
 #include "ray.h"
 #include "vec3.h"
+#include <cstdlib>
 
 using namespace std;
-using shared_ptr;
-using make_shared;
-using sqrt;
+using std::shared_ptr;
+using std::make_shared;
+using std::sqrt;
 
 // Constants
 const double infinity = numeric_limits<double>::infinity();
@@ -25,7 +26,7 @@ inline double degrees_to_radians(double degrees)
 
 inline double radians_to_degrees(double radians) 
 {
-    double degrees = radians * 180.0 / pi
+    double degrees = radians * 180.0 / pi;
     return degrees;
 }
 
