@@ -6,25 +6,35 @@
 using namespace std;
 
 // Create a basic sphere in terms of vectors (to hide component wise math), monte carlo simulation by coloring any pixel red that hits a sphere placed on -1 at the z-axis
-bool hit_sphere(const point3& center, double radius, const ray& r)
+double hit_sphere(const point3& center, double radius, const ray& r)
 {
     vec3 originShift = r.getOrigin() - center;
-    auto a = dot(r.getDirection(), r.getDirection());
-    auto b = 2.0 * dot(originShift, r.getDirection());
-    auto c = dot(originShift, originShift) - radius * radius;
+    auto a = dot(r.getDirection(), r.getDirection()); // Squared length of ray direction vector
+    auto halfB = dot(originShift, r.getDirection());
+    auto c = dot(originShift, originShift) - radius * radius; // Squared length of origin shifted vector - radius of sphere squared
     auto discriminant = (b * b) - 4 * a * c;
-    return (discriminant > 0);
+    if (discriminant < 0)
+    {
+        return -1.0;
+    }
+    else
+    {
+        double shading = (-b - sqrt(discriminant)) / (2 * a);
+        return shading;
+    }
 }
 
 // Returns the color of the background (which should be a simple gradient)
 color ray_color(const ray& r)
 {
-    if (hit_sphere(point3(0,0,-1), 0.5, r))
+    auto t = hit_sphere(point3(0, 0, -1), 0.5, r); // Call hit_sphere to generate a sphere at (0, 0, -1) center with radius 0.5 and ray trace r
+    if (t > 0.0) // If  
     {
-        return color(1, 0, 0);
+        vec3 N = unit_vector(r.destination(t) - vec3(0, 0, -1));
+        return 0.5 * color(N.x() + 1, N.y() + 1, N.z() + 1);
     }
-    vec3 unitDirection = unit_vector(r.getDirection());
-    auto t = 0.5*(unitDirection.y() + 1);
+    vec3 unit_direction = unit_vector(r.getDirection());
+    t = 0.5 * (unit_direction.y() + 1.0);
     return (1.0 - t) * color(1.0, 1.0, 1.0) + t * color(0.5, 0.7, 1.0); //blendedValue = (1 - t) * startValue + t * endValue
 }
 
@@ -36,7 +46,7 @@ int main()
     const int imageWidth = 400;
     const int imageHeight = static_cast<int>(imageWidth / aspect_ratio);
 
-    // Camera for Ray Tracer 
+    // Simulated camera for Ray Tracer 
     auto viewportHeight = 2.0;
     auto viewportWidth = aspect_ratio * viewportHeight;
     auto focalLength = 1.0;
