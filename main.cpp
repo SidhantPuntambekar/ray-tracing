@@ -9,17 +9,17 @@ using namespace std;
 double hit_sphere(const point3& center, double radius, const ray& r)
 {
     vec3 originShift = r.getOrigin() - center;
-    auto a = dot(r.getDirection(), r.getDirection()); // Squared length of ray direction vector
+    auto a = r.getDirection().euclidean_norm_squared(); // Squared length of ray direction vector
     auto halfB = dot(originShift, r.getDirection());
-    auto c = dot(originShift, originShift) - radius * radius; // Squared length of origin shifted vector - radius of sphere squared
-    auto discriminant = (b * b) - 4 * a * c;
+    auto c = originShift.euclidean_norm_squared() - (radius * radius); // Squared length of origin shifted vector - radius of sphere squared
+    auto discriminant = (halfB * halfB) - (a * c);
     if (discriminant < 0)
     {
         return -1.0;
     }
     else
     {
-        double shading = (-b - sqrt(discriminant)) / (2 * a);
+        double shading = (-halfB - sqrt(discriminant)) / (a);
         return shading;
     }
 }
@@ -56,11 +56,11 @@ int main()
     auto vertical = vec3(0, viewportHeight, 0);
     auto lowerLeft = origin - horizontal / 2 - vertical / 2 - vec3(0, 0, focalLength);
 
-    cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n"; // PP
+    cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n"; // PPM output
 
     for (int i = imageHeight - 1; i >= 0; i--) // For each row in the image
     {
-        cerr << "\rDEBUG: Scanlines remaining: " << i << ' ' << flush;
+        cerr << "\rDEBUG: Scanlines remaining: " << i << ' ' << flush; // Stdout debug error
         for (int j = 0; j < imageWidth; j++) // For each column in the image
         {
             auto u = double(j) / (imageWidth - 1);
@@ -71,5 +71,5 @@ int main()
         }
     }
 
-    cerr << "\nDEBUG: Done\n";
+    cerr << "\nDEBUG: Done\n"; // Debug section done
 }
