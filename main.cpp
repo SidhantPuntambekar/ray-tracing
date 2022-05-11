@@ -4,6 +4,7 @@
 #include "ray.h"
 #include "hittable_list.h"
 #include "sphere.h"
+#include "camera.h"
 
 #include <iostream>
 using namespace std;
@@ -48,6 +49,7 @@ int main()
     const double aspect_ratio = 16.0 / 9.0;
     const int imageWidth = 400;
     const int imageHeight = static_cast<int>(imageWidth / aspect_ratio);
+    const int samples_per_pixel = 100;
 
     // World
     hittable_list world;
@@ -55,15 +57,7 @@ int main()
     world.add(make_shared<sphere>(point3(0,-100.5,-1), 100));
 
     // Camera
-    // Simulated camera for Ray Tracer 
-    double viewportHeight = 2.0;
-    double viewportWidth = aspect_ratio * viewportHeight;
-    double focalLength = 1.0;
-
-    auto origin = point3(0, 0, 0);
-    auto horizontal = vec3(viewportWidth, 0, 0);
-    auto vertical = vec3(0, viewportHeight, 0);
-    auto lowerLeft = origin - horizontal / 2 - vertical / 2 - vec3(0, 0, focalLength);
+    camera cam; // Abstract camera code into a separate class and declare an instance of it in the renderer
 
     // Render Sphere and World
     cout << "P3\n" << imageWidth << ' ' << imageHeight << "\n255\n"; // PPM output
@@ -73,11 +67,15 @@ int main()
         cerr << "\rDEBUG: Scanlines remaining: " << i << ' ' << flush; // Stdout debug error
         for (int j = 0; j < imageWidth; j++) // For each column in the image
         {
-            auto u = double(j) / (imageWidth - 1);
-            auto v = double(i) / (imageHeight - 1);
-            ray r = ray(origin, (lowerLeft + u * horizontal + (v * vertical - origin)));
-            color pixelColor = ray_color(r, world);
-            writeColor(cout, pixelColor);
+            color pixelColor(0, 0, 0);
+            for (int s = 0; s < samples_per_pixel; s++)
+            {
+                auto u = double(j + random_double()) / (imageWidth - 1);
+                auto v = double(i + random_double()) / (imageHeight - 1);
+                ray r = cam.getRay(u, v);
+                pixelColor += ray_color(r, world);
+            }
+            writeColor(cout, pixelColor, samples_per_pixel);
         }
     }
 
