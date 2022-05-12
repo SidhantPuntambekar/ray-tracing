@@ -29,12 +29,20 @@ double hit_sphere(const point3& center, double radius, const ray& r)
 }
 
 // Returns the color of the background (which should be a simple gradient)
-color ray_color(const ray& r, const hittable& world) 
+color ray_color(const ray& r, const hittable& world, int depth) 
 {
     hit_record rec;
-    if (world.hit(r, 0, infinity, rec)) 
+
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if (depth <= 0)
     {
-        return 0.5 * (rec.normal + color(1, 1, 1));
+        return color(0, 0, 0);
+    }
+
+    if (world.hit(r, 0.001, infinity, rec) == true) // Introduce tolerance to ignore hits very close to zero
+    {
+        point3 target = rec.p + rec.normal + random_in_unit_sphere();
+        return 0.5 * ray_color(ray(rec.p, target - rec.p), world, depth - 1); // Potential problem due to recursion depth. Could keep recursing forever so need to set recursion depth
     }
     vec3 unit_direction = unit_vector(r.getDirection());
     auto t = 0.5 * (unit_direction.y() + 1.0);
@@ -50,6 +58,7 @@ int main()
     const int imageWidth = 400;
     const int imageHeight = static_cast<int>(imageWidth / aspect_ratio);
     const int samples_per_pixel = 100;
+    const int max_depth = 50;
 
     // World
     hittable_list world;
@@ -73,7 +82,7 @@ int main()
                 auto u = double(j + random_double()) / (imageWidth - 1);
                 auto v = double(i + random_double()) / (imageHeight - 1);
                 ray r = cam.getRay(u, v);
-                pixelColor += ray_color(r, world);
+                pixelColor += ray_color(r, world, max_depth);
             }
             writeColor(cout, pixelColor, samples_per_pixel);
         }

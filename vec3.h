@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cmath>
+#include "util.h"
 
 using namespace std;
 
@@ -75,6 +76,29 @@ class vec3
         {
             return sqrt(euclidean_norm_squared());
         }
+
+        inline static double random_double() 
+        {
+            // Returns a random real in [0,1).
+            return rand() / (RAND_MAX + 1.0);
+        }
+
+        inline static double random_double(double min, double max) 
+        {
+            // Returns a random real in [min,max).
+            return min + (max - min) * random_double();
+        }
+
+        // Random util vec3 functions
+        inline static vec3 random()  // Generate random vec3 
+        {
+            return vec3(random_double(), random_double(), random_double());
+        }
+
+        inline static vec3 random(double min, double max) // Generate random vec3 with min and max values specified
+        {
+            return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+        }
 };
 
 // Type aliases for vec3
@@ -133,6 +157,21 @@ inline vec3 cross(const vec3 &u, const vec3 &v) // Vector cross product
 inline vec3 unit_vector(vec3 v) // Normalize to unit vector
 {
     return v / v.length();
+}
+
+
+
+vec3 random_in_unit_sphere() // Check if vector is in unit sphere. If it is in, then sphere is absorbant, else not absorbant
+{
+    while (true) 
+    {
+        auto p = vec3::random(-1, 1);
+        if (p.euclidean_norm_squared() >= 1) 
+        {
+            continue;
+        }
+        return p;
+    }
 }
 
 #endif

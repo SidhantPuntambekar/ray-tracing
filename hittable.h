@@ -3,12 +3,17 @@
 
 #include <iostream>
 #include "ray.h"
+#include "util.h"
+
 using namespace std;
+
+class material;
 
 struct hit_record
 {
     point3 p; // Point where hit
     vec3 normal; // Normal vector to hit point
+    shared_ptr<material> matPtr; // Shared pointer to sphere material (materials implemented through how rays reflect off sphere)
     double t; // Scalar for ray
 
     bool front_face; // Determine if the ray is pointing from the inside of the sphere or outside of the sphere by determining the direction of the normal vectors
