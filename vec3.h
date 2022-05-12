@@ -99,6 +99,13 @@ class vec3
         {
             return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
         }
+
+        bool near_zero() const 
+        {
+            // Return true if the vector is close to zero in all dimensions.
+            const auto s = 1e-8;
+            return (fabs(e[0]) < s) && (fabs(e[1]) < s) && (fabs(e[2]) < s);
+        }
 };
 
 // Type aliases for vec3
@@ -159,8 +166,6 @@ inline vec3 unit_vector(vec3 v) // Normalize to unit vector
     return v / v.length();
 }
 
-
-
 vec3 random_in_unit_sphere() // Check if vector is in unit sphere. If it is in, then sphere is absorbant, else not absorbant
 {
     while (true) 
@@ -172,6 +177,17 @@ vec3 random_in_unit_sphere() // Check if vector is in unit sphere. If it is in, 
         }
         return p;
     }
+}
+
+vec3 random_unit_vector() 
+{
+    return unit_vector(random_in_unit_sphere());
+}
+
+// Metal surface. The reflected ray direction in red is just v + 2B
+vec3 reflect(const vec3& v, const vec3& n) 
+{
+    return v - 2 * dot(v, n) * n;
 }
 
 #endif
